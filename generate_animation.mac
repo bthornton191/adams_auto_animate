@@ -1,0 +1,68 @@
+!WRAP_IN_UNDO NO
+!
+!$input_angles:t=real:u=0.0:c=0
+!$analysis_name:t=string:u=cvdyn
+!$model:t=model:a
+!
+!END_OF_PARAMETERS
+
+!  Changed code to select the last analysis to make a movie of, 
+!  instead of the first.  ASE, 10/06.
+
+!
+interface plot window open
+interface window undisplay window = .gui.main
+defaults plotting curve_thickness=1
+!
+variable set variable_name=$model.analysis_name string_value=$analysis_name
+!
+!
+defaults hardcopy language="png"
+!
+defaults hardcopy send_to_printer=no
+!
+interface plot window page_display page_name=.gui.ppt_main.sash1.sash2.gfx.page_1
+interface plot window page_display page_name=.gui.ppt_main.sash1.sash2.gfx.page_2
+hardcopy  page_name=.gui.ppt_main.sash1.sash2.gfx.page_2 file=(eval($model.analysis_name)//"_Order_vs_ArtAngle")
+file table write  &
+	file_name=(eval($model.analysis_name)//"_Order_vs_ArtAngle") &  
+	plot_name = .ACFG_1 &
+	format = spreadsheet
+!
+interface plot window page_display page_name=.gui.ppt_main.sash1.sash2.gfx.page_3
+hardcopy  page_name=.gui.ppt_main.sash1.sash2.gfx.page_3 file=(eval($model.analysis_name)//"_AxialForce_vs_RotAngle")
+file table write  &
+	file_name=(eval($model.analysis_name)//"_AxialForce_vs_RotAngle") &  
+	plot_name = .ACFG_1_rotation &
+	format = spreadsheet
+!
+!****** These commands create the animation movie file.
+ interface plot window create_new_page default_layout=yes
+! !
+if condition=("animation" !="")
+	interface plot window set_mode mode=Animation
+else
+	interface plot window set_mode=plotting
+end
+
+! find the *last* analysis, then load it
+variable set variable_name=$_self.acount int=(eval(DB_OBJECT_COUNT(DB_children($model,"analysis"))))
+interface plot window load_view analysis=(eval($model.analysis_name)//"_"//($_self.acount))
+
+color modify &
+	color=Background &
+	red=1.0 &
+	green=1.0 &
+	blue=1.0
+display visibility part part_name=shaft_2 visibility=off
+ 
+view management orient view=iso up_axis=(.MDI.up_axis) forward_axis=(.MDI.forward_axis)
+view zoom auto=on
+
+animation modify increment_frame_by=10 animation_name=.animation_1
+animation record start image_prefix=(eval($model.analysis_name)) image_type=mpg mpeg_ngop=12 mpeg_round_size=no  
+defaults animation_settings loop=play_once
+animation play page_name=.gui.ppt_main.sash1.sash2.gfx.page_4
+animation record stop 
+
+variable delete variable_name=$_self.*
