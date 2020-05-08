@@ -1,0 +1,23 @@
+! -----------------------------------------------------------------------------------
+! Test Description: Multiple Analysis, view
+!
+!
+!
+!
+!
+! -----------------------------------------------------------------------------------
+
+!-----------------------
+! Delete local variables
+!-----------------------
+if condition=(eval(db_of_type_exists(".adams_auto_animate.*", "variable")))
+   var del var=.adams_auto_animate.*
+end
+
+!----------
+! Run Macro
+!----------
+auto_animate &
+	analyses=run_001, run_002, run_003 &
+	view=Front
+	

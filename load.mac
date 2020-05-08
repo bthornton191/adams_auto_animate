@@ -1,0 +1,55 @@
+! ---------------------------------------------
+! Delete macro dialog box if it's already there
+! ---------------------------------------------
+if condition=(DB_EXISTS(".gui.dbox_adams_auto_animate"))
+   group empty group = select_list
+   group object add group=select_list &
+         objects = .gui.dbox_adams_auto_animate
+   mdi delete_macro
+end
+ 
+! --------------------------------------
+! Delete separator if it's already there
+! --------------------------------------
+if condition=(DB_EXISTS(".gui.main.mmenu_menu.mbar_refresh.tools.sep__autoani"))
+   group empty group = select_list
+   group object add group=select_list &
+         objects = .gui.main.mmenu_menu.mbar_refresh.tools.sep__autoani
+   mdi delete_macro
+end
+
+! ----------------------------------------
+! Delete menu button if it's already there
+! ----------------------------------------
+if condition=(DB_EXISTS(".gui.main.mmenu_menu.mbar_refresh.tools.adams_auto_animate_btn"))
+   group empty group = select_list
+   group object add group=select_list &
+         objects = .gui.main.mmenu_menu.mbar_refresh.tools.adams_auto_animate_btn
+   mdi delete_macro
+end
+
+! ----------------------------------------------
+! Create a dialog box for the adams_auto_animate macro
+! ----------------------------------------------
+macro modify &
+   macro_name = .adams_auto_animate.adams_auto_animate &
+   create_panel = yes
+
+! Clean up the auto-generated dialog box
+interface dialog_box modify &
+	dialog_box_name = .gui.dbox_adams_auto_animate &
+	title = "Auto Animate" &
+  
+! ------------------
+! Create a separator
+! ------------------
+interface separator create  &
+   separator_name = .gui.main.mmenu_menu.mbar_refresh.tools.sep__autoani
+   
+! --------------------
+! Create a menu button
+! --------------------
+interface push_button create push_button_name = .gui.main.mmenu_menu.mbar_refresh.tools.adams_auto_animate_btn &
+  label="Auto Animate" &
+  command = "interface dialog display dialog=.gui.dbox_adams_auto_animate"
+  

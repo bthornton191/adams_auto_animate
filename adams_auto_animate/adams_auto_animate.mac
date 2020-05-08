@@ -1,0 +1,159 @@
+! -----------------------------------------------------------------
+! 	MACRO NAME: 	generate_anamiation
+!	Description: 	
+!	Authour: 		Ben Thornton (ben.thornton@mscsoftware.com)
+!
+!WRAP_IN_UNDO NO
+!
+!$analyses:t=analysis:c=0
+!$parts_to_hide:t=part:c=0:d=""
+!$view:t=list(Front,Back,Left,Right,Top,Bottom,Iso):d=Iso
+!$up_axis:t=list(X_pos,X_neg,Y_pos,Y_neg,Z_pos,Z_neg):d=Y_pos
+!$forward_axis:t=list(X_pos,X_neg,Y_pos,Y_neg,Z_pos,Z_neg):d=Z_pos
+!$auto_zoom:t=list(on, no_ground):d=on
+!$zoom_factor:t=real:d=1
+!$increment_frame_by:t=INTEGER:d=1
+!$video_format:t=list(avi,mpg):d=avi
+!$avi_compression:t=list(yes, no):d=yes
+!$avi_quality:t=INTEGER:GE=1:LE=100:d=75
+!$avi_keyframe_every:t=INTEGER:d=500
+!$avi_frames_per_sec:t=INTEGER:d=10
+!$mpeg_ngop:t=INTEGER:d=12
+!$mpeg_round_size:t=list(yes,no):d=no
+!$window_size:t=INTEGER:c=2:d=""
+!$delete_pages:t=list(yes,no):d=yes
+!
+!END_OF_PARAMETERS
+! -----------------------------------------------------------------
+
+! ------------------
+! Vaildate Arguments
+! ------------------
+if condition=(str_substr("$up_axis", 1, 1) == str_substr("$forward_axis", 1, 1))
+	variable set variable_name=$_self.xalert &
+		integer_value=(eval(alert("error", "You must have different axes for up_axis and forward_axis.", "OK", "", "", 1)))
+	return
+end
+
+! -----------------------------------------------------------
+! Reset the current animation/simulation in case there is one
+! -----------------------------------------------------------
+simulation single_run reset 
+
+! ----------------------------
+! Switch to the post processor
+! ----------------------------
+interface plot window open
+
+! --------------------------------
+! Create the animation movie files
+! --------------------------------
+for variable_name=$_self.ans object_names=$analyses
+	
+	! -----------------
+	! Create a new page
+	! -----------------
+	variable set variable_name=$_self.pg_name string_value=(eval(unique_name("_animation_page")))	
+	interface page create page_name=(eval($_self.pg_name))
+	interface page display page_name=(eval($_self.pg_name))
+	interface plot window set_mode mode=animation
+	
+	!------------------
+	! Load the Analysis
+	!------------------
+	interface plot window load_view analysis=(eval($_self.ans))
+	
+	!----------------
+	! Format the view
+	!----------------
+	! Adjust Background Color
+	color modify color_name=Background red=1.0 green=1.0 blue=1.0
+	
+	! Hide Parts
+	if condition=("$parts_to_hide" != "")
+		for variable_name=$_self.part_to_hide object_names=$parts_to_hide
+			display visibility part part_name=(eval($_self.part_to_hide)) visibility=off
+		end
+	end
+
+	! Adjust Orientation
+	view management orient view=$view up_axis=$up_axis forward_axis=$forward_axis
+	
+	! Adjust Zoom
+	view zoom auto_zoom=$auto_zoom
+	view zoom zoom_factor=$zoom_factor
+		
+	!-------------------
+	! Set video settings
+	!-------------------
+	animation modify increment_frame_by=$increment_frame_by animation_name=(eval(stoo(stoo($_self.pg_name).views[1]).contents[1]))
+	defaults animation_settings loop=play_once
+	
+	! Check the video format
+	if condition=("$video_format" == "mpg")
+		
+		! If using **MPG**, check if the window size is specified
+		if condition=("$window_size" == "")
+		
+			! If the window size is **NOT** specified, start the recording **WITHOUT** the window_size argument
+			animation record start &
+				image_prefix = (eval(DB_SHORT_NAME($_self.ans))) &
+				image_type = mpg &
+				mpeg_ngop = $mpeg_ngop &
+				mpeg_round_size = $mpeg_round_size				
+		else		
+		
+			! If the window size **IS** specified, start the recording **WITH** the window_size argument
+			animation record start &
+				image_prefix = (eval(DB_SHORT_NAME($_self.ans))) &
+				image_type = mpg &
+				mpeg_ngop = $mpeg_ngop &
+				mpeg_round_size = $mpeg_round_size &
+				window_size = $window_size
+		end		
+		
+	else
+	
+		! If using **AVI**, check if the window size is specified
+		if condition=("$window_size" == "")
+		
+			! If the window size is **NOT** specified, start the recording **WITHOUT** the window_size argument
+			animation record start &
+				image_prefix = (eval(DB_SHORT_NAME($_self.ans))) &
+				image_type = avi &
+				avi_compression = $avi_compression &
+				avi_quality = $avi_quality &
+				avi_keyframe_every = $avi_keyframe_every &
+				avi_frames_per_sec = $avi_frames_per_sec
+			
+		else
+		
+			! If the window size **IS** specified, start the recording **WITH** the window_size argument
+			animation record start &
+				image_prefix = (eval(DB_SHORT_NAME($_self.ans))) &
+				image_type = avi &
+				avi_compression = $avi_compression &
+				avi_quality = $avi_quality &
+				avi_keyframe_every = $avi_keyframe_every &
+				avi_frames_per_sec = $avi_frames_per_sec &
+				window_size = $window_size
+		end			
+	end
+	
+	! Play the animation
+	animation play page_name=(eval($_self.pg_name))
+	animation record stop 
+	interface page delete page_name=(eval($_self.pg_name))
+end
+
+! Unhide Parts
+if condition=("$parts_to_hide" != "")
+	for variable_name=$_self.part_to_hide object_names=$parts_to_hide
+		display visibility part part_name=(eval($_self.part_to_hide)) visibility=on
+	end
+end
+
+!-----------------------
+! Delete local variables
+!-----------------------
+variable delete variable_name=$_self.*
