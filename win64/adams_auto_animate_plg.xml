@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<MSCPlugin xmlns="http://www.adams.com/:MDI" xmlns:kernel="http://www.adams.com/:kernel">
+
+  <kernel:Bibliography>
+    <File schema="plugin" version="1.0.0" publicationDate="2020-05-07 12:00:00 -0500" />
+    <Revision version="1" />
+    <Corporation author="MSC.Software" URI="http://www.mscsoftware.com/" />
+    <Author user="ben.thornton" name="Ben Thornton" />
+    <Environment hostName="Unknown" operatingSystem="Unknown" />
+    <Application name="Adams" version="" />
+  </kernel:Bibliography>
+
+  <Plugin>
+    <Name>Adams Auto Animate</Name>
+    <Description>
+      <![CDATA[A plugin for automating animation generation in Adams View]]>
+    </Description>
+    <Version>0.0.1</Version>
+    <Author>Ben Thornton</Author>
+    <Type>Public</Type>
+    <LicenseFeature></LicenseFeature>
+    <ValidWith>aview</ValidWith>
+    <NotValidWith></NotValidWith>
+  </Plugin>
+
+</MSCPlugin>
